@@ -27,19 +27,24 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-EXCEL_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "용수.xlsx")
+DATA_DIR = os.path.dirname(os.path.abspath(__file__))
+CSV_FILE = os.path.join(DATA_DIR, "용수.csv")
+EXCEL_FILE = os.path.join(DATA_DIR, "용수.xlsx")
 
 @st.cache_data
 def load_data():
-    df = pd.read_excel(EXCEL_FILE, engine="openpyxl", header=1)
-    df.columns = [
-        "연번", "시설번호", "수리형식", "시도명", "시군구명", "시군구코드",
-        "도로명주소", "지번주소", "위도", "경도", "상세위치",
-        "안전센터명", "보호틀유무", "사용가능여부", "설치연도",
-        "배관깊이", "출수압력", "배관지름", "관할소방서명",
-        "소방서전화번호", "표지설치여부", "설치주체", "적색노면표시", "비고"
-    ]
-    df["도로명주소"] = df["도로명주소"].fillna(df["지번주소"])
+    if os.path.exists(CSV_FILE):
+        df = pd.read_csv(CSV_FILE, encoding="utf-8-sig")
+    else:
+        df = pd.read_excel(EXCEL_FILE, engine="openpyxl", header=1)
+        df.columns = [
+            "연번", "시설번호", "수리형식", "시도명", "시군구명", "시군구코드",
+            "도로명주소", "지번주소", "위도", "경도", "상세위치",
+            "안전센터명", "보호틀유무", "사용가능여부", "설치연도",
+            "배관깊이", "출수압력", "배관지름", "관할소방서명",
+            "소방서전화번호", "표지설치여부", "설치주체", "적색노면표시", "비고"
+        ]
+    df["도로명주소"] = df["도로명주소"].fillna(df["지번주소"].fillna(""))
     df = df.dropna(subset=["위도", "경도"])
     df["위도"] = pd.to_numeric(df["위도"], errors="coerce")
     df["경도"] = pd.to_numeric(df["경도"], errors="coerce")
