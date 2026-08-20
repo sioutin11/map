@@ -122,25 +122,14 @@ with col_input1:
 
 with col_input2:
     st.subheader("GPS 현재 위치 사용")
-    if st.button("GPS 현재 위치로 검색", use_container_width=True, type="primary"):
-        from streamlit_javascript import st_javascript
-        result = st_javascript("""
-            await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {enableHighAccuracy: true, timeout: 10000, maximumAge: 0});
-            }).then(pos => pos.coords.latitude + ',' + pos.coords.longitude)
-              .catch(err => 'error:' + err.code)
-        """)
-        if result and str(result) != "None":
-            result = str(result)
-            if result.startswith("error:"):
-                code = result.split(":")[1]
-                errors = {"0": "GPS를 지원하지 않는 브라우저입니다", "1": "위치 권한이 거부되었습니다", "2": "위치 정보를 사용할 수 없습니다", "3": "위치 요청 시간 초과"}
-                st.warning(errors.get(code, "알 수 없는 오류"))
-            else:
-                lat, lng = result.split(",")
-                st.query_params["gps_lat"] = lat
-                st.query_params["gps_lng"] = lng
-                st.rerun()
+    from streamlit_geolocation import streamlit_geolocation
+    location = streamlit_geolocation()
+    if location and location.get("latitude") and location.get("longitude"):
+        lat = location["latitude"]
+        lng = location["longitude"]
+        st.query_params["gps_lat"] = str(lat)
+        st.query_params["gps_lng"] = str(lng)
+        st.rerun()
     st.caption("버튼을 누르면 GPS 위치가 자동으로 설정됩니다.")
 
 st.divider()
