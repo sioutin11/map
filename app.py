@@ -123,21 +123,20 @@ with col_input1:
 with col_input2:
     st.subheader("GPS 현재 위치 사용")
     try:
-        from streamlit_js_eval import get_geolocation
-        location = get_geolocation()
-        if location and "coords" in location:
-            lat = location["coords"].get("latitude")
-            lng = location["coords"].get("longitude")
-            if lat and lng:
-                current_lat = query_params.get("gps_lat", "")
-                current_lng = query_params.get("gps_lng", "")
-                if str(lat) != current_lat or str(lng) != current_lng:
-                    st.query_params["gps_lat"] = str(lat)
-                    st.query_params["gps_lng"] = str(lng)
-                    st.rerun()
+        from streamlit_geolocation import streamlit_geolocation
+        location = streamlit_geolocation()
+        if location and location.get("latitude") and location.get("longitude"):
+            lat = location["latitude"]
+            lng = location["longitude"]
+            current_lat = query_params.get("gps_lat", "")
+            current_lng = query_params.get("gps_lng", "")
+            if str(lat) != current_lat or str(lng) != current_lng:
+                st.query_params["gps_lat"] = str(lat)
+                st.query_params["gps_lng"] = str(lng)
+                st.rerun()
     except Exception:
         st.warning("GPS 모듈을 불러올 수 없습니다.")
-    st.caption("페이지 로드 시 자동으로 GPS 권한 요청됩니다.")
+    st.caption("버튼을 누르면 GPS 위치가 설정됩니다.")
 
 st.divider()
 
