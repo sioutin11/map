@@ -122,13 +122,37 @@ with col_input1:
 
 with col_input2:
     st.subheader("GPS 현재 위치 사용")
-    st.link_button(
-        "GPS 현재 위치로 검색",
-        "http://localhost:8081/gps.html",
-        use_container_width=True,
-        type="primary"
-    )
-    st.caption("버튼을 누르면 GPS 위치 페이지로 이동합니다. 위치 확인 후 자동으로 돌아옵니다.")
+    if st.button("GPS 현재 위치로 검색", use_container_width=True, type="primary"):
+        import streamlit.components.v1 as components
+        gps_html = """
+        <div id="msg" style="text-align:center;padding:10px;font-size:16px;">위치를 가져오는 중...</div>
+        <script>
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                function(pos) {
+                    var lat = pos.coords.latitude;
+                    var lng = pos.coords.longitude;
+                    document.getElementById("msg").innerHTML = "<span style='color:green'>위치 확인됨</span>";
+                    setTimeout(function() {
+                        window.top.location.href = '/?gps_lat=' + lat + '&gps_lng=' + lng;
+                    }, 1000);
+                },
+                function(err) {
+                    var msg = "알 수 없는 오류";
+                    if (err.code == 1) msg = "위치 권한이 거부되었습니다";
+                    if (err.code == 2) msg = "위치 정보를 사용할 수 없습니다";
+                    if (err.code == 3) msg = "위치 요청 시간 초과";
+                    document.getElementById("msg").innerHTML = "<span style='color:red'>X " + msg + "</span>";
+                },
+                {enableHighAccuracy: true, timeout: 10000, maximumAge: 0}
+            );
+        } else {
+            document.getElementById("msg").innerHTML = "<span style='color:red'>X 이 브라우저는 GPS를 지원하지 않습니다</span>";
+        }
+        </script>
+        """
+        components.html(gps_html, height=60)
+    st.caption("버튼을 누르면 GPS 위치가 자동으로 설정됩니다.")
 
 st.divider()
 
